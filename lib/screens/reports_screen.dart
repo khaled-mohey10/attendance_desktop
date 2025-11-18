@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../services/auth_service.dart'; // استدعاء ملف الخدمة
+import '../services/auth_service.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -39,7 +39,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     });
 
     try {
-      // 2. استخدام الرابط من AuthService
+      // 2. استخدام الرابط الصحيح: /api/reports/daily
       final response = await http.get(
         Uri.parse('${AuthService.baseUrl}/reports/daily'),
         headers: {

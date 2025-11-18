@@ -3,16 +3,17 @@ import 'screens/login_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/reports_screen.dart';
 import 'services/auth_service.dart'; 
+import 'screens/students_mgmt_screen.dart'; // 👈 شاشة إدارة الطلاب
 
 void main() async {
   // 1. ضمان تهيئة بيئة فلاتر قبل استخدام التخزين
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 2. فحص التوكن المحفوظ
+  // 2. فحص التوكن المحفوظ لتحديد شاشة البداية
   final token = await AuthService.getToken();
   final isLoggedIn = token != null;
 
-  // 3. تشغيل التطبيق وتحديد شاشة البداية
+  // 3. تشغيل التطبيق
   runApp(AttendanceApp(startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen()));
 }
 
@@ -29,7 +30,7 @@ class AttendanceApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        fontFamily: 'Segoe UI', // خط مناسب للويندوز
+        fontFamily: 'Segoe UI', 
       ),
       home: startScreen, // يبدأ بالشاشة المناسبة (Login أو Home)
     );
@@ -81,7 +82,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             
-            // زر التسجيل
+            // زر تسجيل الحضور
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -113,6 +114,26 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
                 backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+
+            // --- زر إدارة الطلاب (الـ CRUD) ---
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const StudentsMgmtScreen()),
+                );
+              },
+              icon: const Icon(Icons.manage_accounts),
+              label: const Text('إدارة الطلاب (إضافة/حذف/تعديل)'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+                backgroundColor: Colors.teal, // لون الإدارة
                 foregroundColor: Colors.white,
               ),
             ),
