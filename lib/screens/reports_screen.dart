@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../services/auth_service.dart'; // استدعاء ملف الخدمة
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -10,10 +11,6 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class _ReportsScreenState extends State<ReportsScreen> {
-  // --- ⚠️ إعدادات الاتصال ⚠️ ---
-  final String _apiToken = "1|hSaGURid6SEDSgRldg29cskExu5ZXyj9uTcW1xuc1418b5b3"; // ضع التوكن هنا
-  final String _baseUrl = "http://127.0.0.1:8000/api";
-
   List<dynamic> _reportData = [];
   bool _isLoading = true;
   String _errorMessage = '';
@@ -26,16 +23,27 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   // --- دالة جلب التقرير من السيرفر ---
   Future<void> _fetchDailyReport() async {
+    // 1. جلب التوكن المحفوظ
+    final token = await AuthService.getToken();
+    if (token == null) {
+      setState(() {
+        _errorMessage = 'يرجى تسجيل الدخول أولاً';
+        _isLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
+      // 2. استخدام الرابط من AuthService
       final response = await http.get(
-        Uri.parse('$_baseUrl/reports/daily'),
+        Uri.parse('${AuthService.baseUrl}/reports/daily'),
         headers: {
-          'Authorization': 'Bearer $_apiToken',
+          'Authorization': 'Bearer $token', // استخدام التوكن الديناميكي
           'Accept': 'application/json',
         },
       );
@@ -65,7 +73,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('تقرير الحضور اليومي'),
-        backgroundColor: Colors.indigo, // لون مختلف لتمييز الشاشة
+        backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
         actions: [
           IconButton(

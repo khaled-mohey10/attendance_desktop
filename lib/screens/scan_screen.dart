@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import '../services/auth_service.dart'; // تأكد من استدعاء ملف الخدمة
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -11,11 +12,6 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  // --- ⚠️ إعدادات الاتصال (عدّلها ببياناتك) ⚠️ ---
-  // انسخ التوكن من Postman وضعه هنا مؤقتاً
-  final String _apiToken = "1|hSaGURid6SEDSgRldg29cskExu5ZXyj9uTcW1xuc1418b5b3";
-  final String _baseUrl = "http://127.0.0.1:8000/api";
-  
   // إعدادات التحكم
   final TextEditingController _barcodeController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
@@ -34,21 +30,29 @@ class _ScanScreenState extends State<ScanScreen> {
   Future<void> _submitBarcode(String barcode) async {
     if (barcode.isEmpty) return;
 
+    // 1. جلب التوكن المحفوظ
+    final token = await AuthService.getToken();
+    if (token == null) {
+       _showErrorDialog("يرجى تسجيل الدخول أولاً");
+       return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse('$_baseUrl/attendance/scan');
+      // 2. استخدام الرابط من AuthService
+      final url = Uri.parse('${AuthService.baseUrl}/attendance/scan');
       
       final response = await http.post(
         url,
         headers: {
-          'Authorization': 'Bearer $_apiToken',
+          'Authorization': 'Bearer $token', // استخدام التوكن المحفوظ
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'barcode': barcode,
-          'teacher_id': 1, // نفترض أن المدرس رقم 1 هو المسجل حالياً
+          'teacher_id': 1, // (يمكنك لاحقاً حفظ ID المدرس أيضاً وجلبه)
         }),
       );
 

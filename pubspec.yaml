@@ -41,6 +41,7 @@ dependencies:
   
   # لإدارة الحالة بشكل بسيط (اختياري، لكن يفضل provider)
   provider: ^6.1.1
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

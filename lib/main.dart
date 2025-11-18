@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'screens/login_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/reports_screen.dart';
+import 'services/auth_service.dart'; 
 
-void main() {
-  runApp(const AttendanceApp());
+void main() async {
+  // 1. ضمان تهيئة بيئة فلاتر قبل استخدام التخزين
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 2. فحص التوكن المحفوظ
+  final token = await AuthService.getToken();
+  final isLoggedIn = token != null;
+
+  // 3. تشغيل التطبيق وتحديد شاشة البداية
+  runApp(AttendanceApp(startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen()));
 }
 
 class AttendanceApp extends StatelessWidget {
-  const AttendanceApp({super.key});
+  final Widget startScreen;
+  
+  const AttendanceApp({super.key, required this.startScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +31,26 @@ class AttendanceApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Segoe UI', // خط مناسب للويندوز
       ),
-      home: const HomeScreen(),
+      home: startScreen, // يبدأ بالشاشة المناسبة (Login أو Home)
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+  
+  // --- دالة تسجيل الخروج ---
+  void _logout(BuildContext context) async {
+    await AuthService.logout();
+    if (context.mounted) {
+      // الانتقال لشاشة تسجيل الدخول وحذف كل الصفحات السابقة
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +60,14 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
+        actions: [
+            // زر تسجيل الخروج
+            IconButton(
+              onPressed: () => _logout(context), 
+              icon: const Icon(Icons.logout),
+              tooltip: 'تسجيل الخروج',
+            )
+        ],
       ),
       body: Center(
         child: Column(
@@ -46,9 +79,27 @@ class HomeScreen extends StatelessWidget {
               'مرحباً بك في نظام الحضور',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20), // مسافة بين الزرين
+            const SizedBox(height: 30),
+            
+            // زر التسجيل
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const ScanScreen()),
+                );
+              },
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('بدء تسجيل الحضور (Scan)'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
 
-            // --- الزر الجديد (التقارير) ---
+            const SizedBox(height: 20),
+
+            // زر التقارير
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -61,7 +112,7 @@ class HomeScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
-                backgroundColor: Colors.indigo, // لون مختلف
+                backgroundColor: Colors.indigo,
                 foregroundColor: Colors.white,
               ),
             ),
