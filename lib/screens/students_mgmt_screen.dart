@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import '../services/auth_service.dart'; // يعتمد على ملف AuthService
+import '../services/auth_service.dart';
 
 class StudentsMgmtScreen extends StatefulWidget {
   const StudentsMgmtScreen({super.key});
@@ -13,29 +13,26 @@ class StudentsMgmtScreen extends StatefulWidget {
 
 class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
   List<dynamic> _students = [];
-  List<dynamic> _classes = []; // نحتاج قائمة الفصول لنموذج الإضافة/التعديل
+  List<dynamic> _classes = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchInitialData(); // جلب قائمة الطلاب والفصول عند البداية
+    _fetchInitialData();
   }
 
-  // --- 1. جلب البيانات (طلاب + فصول) ---
   Future<void> _fetchInitialData() async {
     setState(() => _isLoading = true);
     try {
       final token = await AuthService.getToken();
       if (token == null) return;
 
-      // جلب الطلاب (GET /api/students)
       final studentsResp = await http.get(
         Uri.parse('${AuthService.baseUrl}/students'),
         headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
       );
 
-      // جلب الفصول (GET /api/classes)
       final classesResp = await http.get(
         Uri.parse('${AuthService.baseUrl}/classes'),
         headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
@@ -51,20 +48,17 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
         _showError("فشل تحميل البيانات");
       }
     } catch (e) {
-      _showError("خطأ في الاتصال: $e");
+      _showError("خطأ في الاتصال");
     }
   }
 
-  // --- 2. الإضافة والتعديل (شكل النموذج) ---
   Future<void> _saveStudent({Map<String, dynamic>? existingStudent}) async {
     final isEdit = existingStudent != null;
     
     final nameController = TextEditingController(text: isEdit ? existingStudent['name'] : '');
     final barcodeController = TextEditingController(text: isEdit ? existingStudent['barcode'] : '');
-    // افتراض ID ولي الأمر (يمكن لاحقاً إضافة شاشة لإدارتهم)
-    final parentIdController = TextEditingController(text: isEdit ? existingStudent['parent_id'].toString() : '2'); 
+    final parentIdController = TextEditingController(text: isEdit ? existingStudent['parent_id'].toString() : '2');
     
-    // تحديد الفصل المبدئي
     int? selectedClassId = isEdit ? existingStudent['school_class_id'] : (_classes.isNotEmpty ? _classes.first['id'] : null);
 
     showDialog(
@@ -85,7 +79,6 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
                 decoration: const InputDecoration(labelText: 'الباركود', border: OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
-              // Dropdown للفصول
               DropdownButtonFormField<int>(
                 value: selectedClassId,
                 decoration: const InputDecoration(labelText: 'الفصل', border: OutlineInputBorder()),
@@ -107,7 +100,7 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context); // إغلاق النافذة
+              Navigator.pop(context);
               await _submitSave(
                 id: isEdit ? existingStudent['id'] : null,
                 name: nameController.text,
@@ -123,14 +116,12 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
     );
   }
 
-  // تنفيذ الحفظ (POST/PUT) في السيرفر
   Future<void> _submitSave({int? id, required String name, required String barcode, required int classId, required String parentId}) async {
     setState(() => _isLoading = true);
     try {
       final token = await AuthService.getToken();
       final isEdit = id != null;
       
-      // تحديد الرابط والـ HTTP Method
       final url = Uri.parse('${AuthService.baseUrl}/students${isEdit ? '/$id' : ''}');
       final method = isEdit ? http.put : http.post; 
 
@@ -141,13 +132,13 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
           'name': name,
           'barcode': barcode,
           'school_class_id': classId,
-          'parent_id': int.tryParse(parentId) ?? 2, // تحويل لنوع int
+          'parent_id': int.tryParse(parentId) ?? 2,
         }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccess(isEdit ? "تم التعديل بنجاح" : "تمت الإضافة بنجاح");
-        _fetchInitialData(); // تحديث القائمة
+        _fetchInitialData(); 
       } else {
         final err = jsonDecode(response.body);
         _showError(err['message'] ?? "حدث خطأ");
@@ -159,7 +150,6 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
     }
   }
 
-  // --- 3. حذف طالب (DELETE) ---
   Future<void> _deleteStudent(int id) async {
     AwesomeDialog(
       context: context,
@@ -171,7 +161,6 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
         setState(() => _isLoading = true);
         try {
           final token = await AuthService.getToken();
-          // استخدام الرابط الصحيح: DELETE /api/students/{id}
           final response = await http.delete(
             Uri.parse('${AuthService.baseUrl}/students/$id'),
             headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
@@ -191,7 +180,6 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
     ).show();
   }
 
-  // دوال مساعدة
   void _showError(String msg) {
     AwesomeDialog(context: context, dialogType: DialogType.error, title: 'خطأ', desc: msg).show();
   }
@@ -208,7 +196,7 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
         foregroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _classes.isNotEmpty ? () => _saveStudent() : null, // لا تعمل لو لا يوجد فصول
+        onPressed: _classes.isNotEmpty ? () => _saveStudent() : null,
         backgroundColor: Colors.teal,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -225,7 +213,7 @@ class _StudentsMgmtScreenState extends State<StudentsMgmtScreen> {
                     DataColumn(label: Text('الاسم')),
                     DataColumn(label: Text('الباركود')),
                     DataColumn(label: Text('الفصل')),
-                    DataColumn(label: Text('تحكم')), // أزرار التعديل والحذف
+                    DataColumn(label: Text('تحكم')),
                   ],
                   rows: _students.map((student) {
                     return DataRow(cells: [

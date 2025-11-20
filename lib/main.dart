@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/reports_screen.dart';
-import 'services/auth_service.dart'; 
-import 'screens/students_mgmt_screen.dart'; // 👈 شاشة إدارة الطلاب
+import 'services/auth_service.dart';
+import 'screens/students_mgmt_screen.dart';
+import 'screens/classes_mgmt_screen.dart'; // 👈 شاشة إدارة الفصول (تأكد من وجودها)
 
 void main() async {
-  // 1. ضمان تهيئة بيئة فلاتر قبل استخدام التخزين
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 2. فحص التوكن المحفوظ لتحديد شاشة البداية
   final token = await AuthService.getToken();
   final isLoggedIn = token != null;
 
-  // 3. تشغيل التطبيق
-  runApp(AttendanceApp(startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen()));
+  runApp(AttendanceApp(
+    startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+  ));
 }
 
 class AttendanceApp extends StatelessWidget {
@@ -30,9 +30,9 @@ class AttendanceApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        fontFamily: 'Segoe UI', 
+        fontFamily: 'Segoe UI',
       ),
-      home: startScreen, // يبدأ بالشاشة المناسبة (Login أو Home)
+      home: startScreen,
     );
   }
 }
@@ -40,11 +40,9 @@ class AttendanceApp extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   
-  // --- دالة تسجيل الخروج ---
   void _logout(BuildContext context) async {
     await AuthService.logout();
     if (context.mounted) {
-      // الانتقال لشاشة تسجيل الدخول وحذف كل الصفحات السابقة
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -62,12 +60,11 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
         actions: [
-            // زر تسجيل الخروج
-            IconButton(
-              onPressed: () => _logout(context), 
-              icon: const Icon(Icons.logout),
-              tooltip: 'تسجيل الخروج',
-            )
+          IconButton(
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.logout),
+            tooltip: 'تسجيل الخروج',
+          )
         ],
       ),
       body: Center(
@@ -81,12 +78,11 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
-            
-            // زر تسجيل الحضور
+
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context, 
+                  context,
                   MaterialPageRoute(builder: (context) => const ScanScreen()),
                 );
               },
@@ -100,11 +96,10 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // زر التقارير
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context, 
+                  context,
                   MaterialPageRoute(builder: (context) => const ReportsScreen()),
                 );
               },
@@ -117,14 +112,13 @@ class HomeScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-            
+
             const SizedBox(height: 20),
 
-            // --- زر إدارة الطلاب (الـ CRUD) ---
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context, 
+                  context,
                   MaterialPageRoute(builder: (context) => const StudentsMgmtScreen()),
                 );
               },
@@ -133,10 +127,33 @@ class HomeScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
-                backgroundColor: Colors.teal, // لون الإدارة
+                backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // -------------------------------
+            // زر إدارة الفصول الجديد
+            // -------------------------------
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ClassesMgmtScreen()),
+                );
+              },
+              icon: const Icon(Icons.class_),
+              label: const Text('إدارة الفصول'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            // -------------------------------
           ],
         ),
       ),
