@@ -4,7 +4,8 @@ import 'screens/scan_screen.dart';
 import 'screens/reports_screen.dart';
 import 'services/auth_service.dart';
 import 'screens/students_mgmt_screen.dart';
-import 'screens/classes_mgmt_screen.dart'; // 👈 شاشة إدارة الفصول (تأكد من وجودها)
+import 'screens/classes_mgmt_screen.dart';
+import 'screens/finance_mgmt_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -134,9 +135,6 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // -------------------------------
-            // زر إدارة الفصول الجديد
-            // -------------------------------
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -153,7 +151,29 @@ class HomeScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-            // -------------------------------
+
+            const SizedBox(height: 20),
+
+            // ------------------------------------------------
+            // زر الإدارة المالية الجديد
+            // ------------------------------------------------
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FinanceMgmtScreen()),
+                );
+              },
+              icon: const Icon(Icons.account_balance_wallet),
+              label: const Text('الإدارة المالية ورصيد الطلاب'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+                backgroundColor: Colors.blueGrey,
+                foregroundColor: Colors.white,
+              ),
+            ),
+            // ------------------------------------------------
           ],
         ),
       ),
