@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'screens/scan_screen.dart';
 import 'screens/reports_screen.dart';
-import 'services/auth_service.dart';
+import 'services/auth_service.dart'; 
 import 'screens/students_mgmt_screen.dart';
-import 'screens/classes_mgmt_screen.dart';
-import 'screens/finance_mgmt_screen.dart';
+import 'screens/classes_mgmt_screen.dart'; 
+import 'screens/finance_mgmt_screen.dart'; 
+import 'screens/staff_expenses_screen.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +14,7 @@ void main() async {
   final token = await AuthService.getToken();
   final isLoggedIn = token != null;
 
-  runApp(AttendanceApp(
-    startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen(),
-  ));
+  runApp(AttendanceApp(startScreen: isLoggedIn ? const HomeScreen() : const LoginScreen()));
 }
 
 class AttendanceApp extends StatelessWidget {
@@ -31,16 +30,17 @@ class AttendanceApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
-        fontFamily: 'Segoe UI',
+        fontFamily: 'Segoe UI', 
       ),
-      home: startScreen,
+      home: startScreen, 
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-  
+  // لا يوجد تغيير هنا
+  const HomeScreen({super.key}); 
+
   void _logout(BuildContext context) async {
     await AuthService.logout();
     if (context.mounted) {
@@ -61,11 +61,11 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout),
-            tooltip: 'تسجيل الخروج',
-          )
+            IconButton(
+              onPressed: () => _logout(context), 
+              icon: const Icon(Icons.logout),
+              tooltip: 'تسجيل الخروج',
+            )
         ],
       ),
       body: Center(
@@ -79,11 +79,12 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
-
+            
+            // 1. زر تسجيل الحضور
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  context, 
                   MaterialPageRoute(builder: (context) => const ScanScreen()),
                 );
               },
@@ -97,10 +98,11 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            // 2. زر التقارير
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  context, 
                   MaterialPageRoute(builder: (context) => const ReportsScreen()),
                 );
               },
@@ -113,13 +115,14 @@ class HomeScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-
+            
             const SizedBox(height: 20),
 
+            // 3. زر إدارة الطلاب
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  context, 
                   MaterialPageRoute(builder: (context) => const StudentsMgmtScreen()),
                 );
               },
@@ -135,10 +138,11 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
+            // 4. زر إدارة الفصول
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  context, 
                   MaterialPageRoute(builder: (context) => const ClassesMgmtScreen()),
                 );
               },
@@ -151,16 +155,14 @@ class HomeScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-
+            
             const SizedBox(height: 20),
 
-            // ------------------------------------------------
-            // زر الإدارة المالية الجديد
-            // ------------------------------------------------
+            // 5. زر الإدارة المالية (رصيد الطالب)
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
-                  context,
+                  context, 
                   MaterialPageRoute(builder: (context) => const FinanceMgmtScreen()),
                 );
               },
@@ -173,7 +175,26 @@ class HomeScreen extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-            // ------------------------------------------------
+            
+            const SizedBox(height: 20),
+
+            // 6. زر المصروفات التشغيلية (طاقم العمل)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StaffExpensesScreen()),
+                );
+              },
+              icon: const Icon(Icons.receipt),
+              label: const Text('تسجيل مصروفات طاقم العمل'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
